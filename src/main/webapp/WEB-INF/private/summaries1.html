@@ -1,0 +1,287 @@
+<!DOCTYPE html SYSTEM "http://www.thymeleaf.org/dtd/xhtml1-strict-thymeleaf-4.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+
+
+<head>
+    <link rel="stylesheet" type="text/css" th:href="@{/private/css/bootstrap.min.css}"/>
+    <link rel="stylesheet" type="text/css" th:href="@{/private/css/bootstrap-theme.min.css}"/>
+    <link  rel="stylesheet" th:href="@{/private/chartist/chartist-plugin-tooltip.css}">
+    <link  rel="stylesheet" th:href="@{/private/chartist/chartist.min.css}">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>FMH</title>
+
+    <style type="text/css">
+        html, body {background-color: burlywood; height: 100%}
+        body {min-width: 70em;}
+
+        .for_title img {margin-right: 3%}
+        .nav li {font-size: 120%; font-weight: 700}
+        .for_title {padding: 1em}
+        .title {display: inline-block; color: white; font-weight: 800}
+        .for_head {min-height: 10%}
+        .for_head li a {color: white}
+        .for_head li a:hover {color: steelblue}
+        .active * {background-color: burlywood !important;}
+
+        .main_bg {background-color: burlywood; display: inline-block; width: 100%; height: 85%; min-height: 40em; padding: 5%}
+        .main_frame {background-color: burlywood; display: inline-block; width: 100%; height: 30%; min-height: 10em; padding-left: 1%; padding-right: 1%}
+
+        fieldset {border:groove; border-width: 2px; border-color: white;}
+        legend {font-size: 1em; color: steelblue; width: 8em; margin:  0px; padding: 0; color: gray; padding-left: 3px; margin-left: 10px; display:inline; border: none;}
+
+        .ct-label{font-size:1.2rem}
+        .ct-legend {  position: relative;  z-index: 10;  list-style: none;  text-align: center;  }
+        .ct-legend li {  position: relative;  padding-left: 23px;  margin-right: 10px;  margin-bottom: 3px;  cursor: pointer;  display: inline-block;}
+        .ct-legend li:before {width: 12px;  height: 12px;  position: absolute;  left: 0;  content: '';  border: 3px solid transparent;  border-radius: 2px; }
+        .ct-legend .ct-series-0:before {  background-color: #d70206;  border-color: #d70206;  }
+        .ct-legend .ct-series-1:before {  background-color: #f05b4f;  border-color: #f05b4f;  }
+        .ct-legend .ct-series-2:before {  background-color: #f4c63d;  border-color: #f4c63d;  }
+        .ct-legend .ct-series-3:before {  background-color: #d17905;  border-color: #d17905;  }
+        .ct-legend .ct-series-4:before {  background-color: #453d3f;  border-color: #453d3f;  }
+
+        button {margin-top: 5px!important; width: 135px}
+
+        .gray {
+        background: #94b8b8;
+        background: -moz-linear-gradient(top,  #94b8b8 0%, #476b6b 100%);
+        background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#94b8b8), color-stop(100%,#476b6b));
+        background: -webkit-linear-gradient(top,  #94b8b8 0%,#476b6b 100%);
+        background: -o-linear-gradient(top,  #94b8b8 0%,#476b6b 100%);
+        background: -ms-linear-gradient(top,  #94b8b8 0%,#476b6b 100%);
+        background: linear-gradient(top,  #94b8b8 0%,#476b6b 100%);
+        }
+
+    </style>
+
+
+
+</head>
+<body>
+
+<div class="for_head gray">
+    <div class="for_title">
+        <img th:src="@{/private/icons/gerb.png}">  <h2 class="title">Классный администратор</h2>
+    </div>
+
+    <ul class="nav nav-tabs">
+        <li><a th:href="@{/admin/startpage}">Главная</a></li>
+        <li class="active"><a th:href="@{/admin/summaries/chart.html}">График</a></li>
+        <li><a th:href="@{/goout}">Выход</a></li>
+    </ul>
+</div>
+
+
+<div class="main_bg container">
+    <div class="main_frame">
+        <div class="row">
+            <div class="col-xs-6">
+                <h3>Итоговые оценки</h3>
+                <h4>Итоги обучения за текущий учебный год</h4>
+                <br/>
+                <div class="ct-chart"></div>
+                <br/>
+            </div>
+            <div class="col-xs-3">
+            </div>
+            <div class="col-xs-3">
+                <h3 th:text="'Класс '+${sform}"></h3>
+                <h3 style="color: #761c19" th:text="${ssubj}"></h3>
+                <br/><br/>
+                <form method="get"  th:action="@{/admin/summaries/chart.html}">
+                    <fieldset>
+                        <legend>Виберите класс</legend>
+                        <div class="form-group" style="padding: 2em">
+                            <label for="selected_form">Классы</label>
+                            <select class="form-control" onchange="changeHandler(false)" name="sel_form" id="selected_form">
+                                <option th:each="iter : ${from_and_subjects}" th:value="${iter.key}"
+                                        th:text="${iter.key}" th:selected="${iter.key}==${sform}">
+                                </option>
+                            </select>
+                            <br/>
+                            <label for="selected_subj">Предметы</label>
+                            <select class="form-control" name="sel_subj" id="selected_subj">
+                                <option>
+                                </option>
+                            </select>
+                            <br/><br/>
+                            <button type="submit" class="btn btn-warning">Открыть</button>
+                        </div>
+                    </fieldset>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<script th:src="@{/private/js/jquery.min.js}"></script>
+<script th:src="@{/private/chartist/chartist.min.js}"></script>
+<script th:src="@{/private/chartist/chartist-plugin-tooltip.js}"></script>
+<script th:src="@{/private/chartist/legend.js}"></script>
+<script th:inline="javascript">
+
+    //for element select 'onchange'
+    var changeHandler;
+    //selected subject
+    var subj_sel=[[${ssubj}]];
+
+    (function() {
+
+        //draw a chart
+        function drawChart (names, marks) {
+
+            var options = {
+                horizontalBars: true,
+                seriesBarDistance: 9,
+                axisY: {offset: 120, scaleMinSpace: 1},
+                axisX: {onlyInteger: true, position: 'start'},
+                fullWidth: true,
+                height: "100em",
+                plugins: [
+                    Chartist.plugins.tooltip({
+                        appendToBody: true,
+                        anchorToPoint: true
+                    }),
+                    Chartist.plugins.legend()
+                ]
+
+            };
+
+            var chart = new Chartist.Bar('.ct-chart', {
+                labels: names,
+                series: marks
+            }, options);
+
+
+            //animate creation
+            chart.on('draw', function (context) {
+                if (context.type === 'bar') {
+                    var strokeWidth = 7;
+                    context.element.attr({
+                        style: 'stroke-width: 0px'
+                    });
+                    //animation ++++
+                    var s = context.index + 1;
+                    context.element.animate({
+                        x2: {
+                            begin: s * 30,
+                            dur: 500,
+                            from: context.x1,
+                            to: context.x2,
+                            easing: Chartist.Svg.Easing.easeOutSine
+                        },
+                        'stroke-width': {
+                            begin: s * 30,
+                            dur: 1,
+                            from: 0,
+                            to: strokeWidth,
+                            fill: 'freeze'
+                        }
+                    }, false);
+                    //animation +++
+                }
+            });
+
+        }
+
+
+        //helpers
+        //set handler - on select a form change subjects eligible for the form
+        changeHandler = function (first_time_call){
+            var sel = $("#selected_form>option:selected").val();
+            var set;
+
+            //find the form chosen
+            for (key in optionsMap) if (key==sel) set = optionsMap[key];
+            set.sort();
+
+            //fil items
+            $('#selected_subj').empty();
+            $.each(set, function (i, item) {
+                //if first call (load page) select the specified item
+                if (first_time_call && item==subj_sel)
+                    $('#selected_subj').append($('<option>', {
+                        value: item,
+                        text: item,
+                        selected: true
+                    }));
+                else
+                $('#selected_subj').append($('<option>', {
+                    value: item,
+                    text: item
+                }));
+            });
+        };
+
+
+        //marks for the chart
+        //structure: {Series: [{Surname: Mark}]}
+        // to structure for chartist {'name':  Surnames, 'data' : [[marks1], [marks2]...]}
+        function prepareData(set) {
+            var marks=[];
+            var series = Object.keys(set);
+            if (series.length==0) return null;
+            var names=Object.keys(set[series[0]]);
+            for (var key in set) {
+                var ar =[];
+                for (var keyy in set[key]) ar.push(set[key][keyy]);
+                marks.push(
+                    {
+                        'name': key,
+                        'data' : ar
+                    }
+                );
+            }
+            return [series, names, marks];
+        }
+
+        //warning
+        function warnOnEmptyData(data) {
+            if (data==null || data[0].length==0 || data[2].length==0) {
+                $( ".ct-chart" ).replaceWith( "<h3 style='color: #761c19'>Недостаточно информации для представления результатов!</h3>" );
+                return false;
+            }
+            return true;
+        }
+
+
+        //sorter
+        function sortMap(map) {
+            var map2 = {};
+            if (map['Семестрова 1']!=undefined)map2['Семестр 1']= map['Семестрова 1'];
+            if (map['Семестрова 2']!=undefined)map2['Семестр 2']= map['Семестрова 2'];
+            if (map['Річна']!=undefined)map2['Річна    ']= map['Річна'];
+            if (map['ДПА']!=undefined)map2['ДПА     ']= map['ДПА'];
+            if (Object.keys(map2).length!=Object.keys(map).length) return map;
+            return map2;
+        }
+
+
+        //STARTING HERE+++++++++++++
+        //prepare data
+        //list of average marks
+        var rowData = [[${mymap}]];
+        if (rowData==undefined) rowData={};
+        rowData = sortMap(rowData);
+        //series, names and marks in []
+        var various_data=prepareData(rowData);
+        //map of form and corresponding subjects
+        var optionsMap = [[${from_and_subjects}]];
+        //fill option elements
+        changeHandler(true);
+        if (warnOnEmptyData(various_data)) drawChart(various_data[1], various_data[2]);
+
+
+
+
+    })();
+
+</script>
+
+
+</body>
+</html>

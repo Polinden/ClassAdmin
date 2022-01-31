@@ -1,0 +1,257 @@
+<!DOCTYPE html SYSTEM "http://www.thymeleaf.org/dtd/xhtml1-strict-thymeleaf-4.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+
+
+<head>
+    <link rel="stylesheet" type="text/css" th:href="@{/private/css/bootstrap.min.css}"/>
+    <link rel="stylesheet" type="text/css" th:href="@{/private/css/bootstrap-theme.min.css}"/>
+    <link  rel="stylesheet" th:href="@{/private/chartist/chartist-plugin-tooltip.css}">
+    <link  rel="stylesheet" th:href="@{/private/chartist/chartist.min.css}">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>FMH</title>
+
+    <style type="text/css">
+        html, body {background-color: burlywood; height: 100%}
+        body {min-width: 70em;}
+
+        .for_title img {margin-right: 3%}
+        .nav li {font-size: 120%; font-weight: 700}
+        .for_title {padding: 1em}
+        .title {display: inline-block; color: white; font-weight: 800}
+        .for_head {min-height: 10%}
+        .for_head li a {color: white}
+        .for_head li a:hover {color: steelblue}
+        .active * {background-color: burlywood !important;}
+
+        .main_bg {background-color: burlywood; display: inline-block; width: 100%; height: 85%; min-height: 40em; padding: 5%}
+        .main_frame {background-color: burlywood; display: inline-block; width: 100%; height: 30%; min-height: 10em; padding-left: 1%; padding-right: 1%}
+
+        fieldset {border:groove; border-width: 2px; border-color: white;}
+        legend {font-size: 1em; color: steelblue; width: 8em; margin:  0px; padding: 0; color: gray; padding-left: 3px; margin-left: 10px; display:inline; border: none;}
+
+        .ct-label{font-size:1.2rem}
+        .ct-bar  {stroke-width: 11px;}
+        button {margin-top: 5px!important; width: 135px}
+
+        .gray {
+        background: #94b8b8;
+        background: -moz-linear-gradient(top,  #94b8b8 0%, #476b6b 100%);
+        background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#94b8b8), color-stop(100%,#476b6b));
+        background: -webkit-linear-gradient(top,  #94b8b8 0%,#476b6b 100%);
+        background: -o-linear-gradient(top,  #94b8b8 0%,#476b6b 100%);
+        background: -ms-linear-gradient(top,  #94b8b8 0%,#476b6b 100%);
+        background: linear-gradient(top,  #94b8b8 0%,#476b6b 100%);
+        }
+
+    </style>
+
+
+
+</head>
+<body>
+
+<div class="for_head gray">
+    <div class="for_title">
+        <img th:src="@{/private/icons/gerb.png}">  <h2 class="title">Классный администратор</h2>
+    </div>
+
+    <ul class="nav nav-tabs">
+        <li><a th:href="@{/admin/startpage}">Главная</a></li>
+        <li class="active"><a th:href="@{/admin/benchmarks/average.html}">График</a></li>
+        <li><a th:href="@{/goout}">Выход</a></li>
+    </ul>
+</div>
+
+
+<div class="main_bg container">
+    <div class="main_frame">
+        <div class="row">
+            <div class="col-xs-6">
+                <h3>Средний текущий бал</h3>
+                <h4>Среднее арифметическое всех оценок, кроме итоговых</h4>
+                <br/>
+                <div class="ct-chart"></div>
+                <br/>
+            </div>
+            <div class="col-xs-3">
+            </div>
+            <div class="col-xs-3">
+                <h3 th:text="'Класс '+${sform}"></h3>
+                <h3 style="color: #761c19" th:text="${ssubj}"></h3>
+                <br/><br/>
+                <form method="get"  th:action="@{/admin/benchmarks/average.html}">
+                    <fieldset>
+                        <legend>Виберите класс</legend>
+                        <div class="form-group" style="padding: 2em">
+                            <label for="selected_form">Классы</label>
+                            <select class="form-control" onchange="changeHandler(false)" name="sel_form" id="selected_form">
+                                <option th:each="iter : ${from_and_subjects}" th:value="${iter.key}"
+                                        th:text="${iter.key}" th:selected="${iter.key}==${sform}">
+                                </option>
+                            </select>
+                            <br/>
+                            <label for="selected_subj">Предметы</label>
+                            <select class="form-control" name="sel_subj" id="selected_subj">
+                                <option>
+                                </option>
+                            </select>
+                            <br/>
+                            <label class="checkbox-inline">
+                                <input type="checkbox" value="topic" id="checkbox_topic" name="ch_topic" th:checked="${ch_topic}"/>
+                                Тематические
+                            </label>
+                            <br/><br/>
+                            <button type="submit" class="btn btn-warning">Открыть</button>
+                        </div>
+                    </fieldset>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<script th:src="@{/private/js/jquery.min.js}"></script>
+<script th:src="@{/private/chartist/chartist.min.js}"></script>
+<script th:src="@{/private/chartist/chartist-plugin-tooltip.js}"></script>
+<script th:inline="javascript">
+
+
+//for element select 'onchange'
+var changeHandler;
+//selected subject
+var subj_sel=[[${ssubj}]];
+
+(function() {
+
+    //draw a chart
+    function drawChart(names, marks) {
+        var options = {
+            horizontalBars: true,
+            axisY: {offset: 120, scaleMinSpace: 1},
+            axisX: {onlyInteger: true, position: 'start'},
+            fullWidth: true,
+            height: "60em",
+            plugins: [
+                Chartist.plugins.tooltip({
+                    appendToBody: true,
+                    anchorToPoint: true
+                })
+            ]
+
+        };
+        var chart = new Chartist.Bar('.ct-chart', {
+            labels: names,
+            series: [marks]
+        }, options);
+
+
+        //randomize colors and animate
+        chart.on('draw', function (context) {
+            if (context.type === 'bar') {
+                var strokeWidth = 10;
+                context.element.attr({
+                    style: 'stroke: hsl(' + Math.floor(context.value.x / 12 * 240) + ', 50%, 30%); stroke-width: 0px'
+                });
+                //animation ++++
+                var s = context.index + 1;
+                context.element.animate({
+                    x2: {
+                        begin: s * 40,
+                        dur: 600,
+                        from: context.x1,
+                        to: context.x2,
+                        easing: Chartist.Svg.Easing.easeOutSine
+                    },
+                    'stroke-width': {
+                        begin: s * 40,
+                        dur: 1,
+                        from: 0,
+                        to: strokeWidth,
+                        fill: 'freeze'
+                    }
+                }, false);
+                //animation +++
+            }
+        });
+    }
+
+    //helpers
+    //set handler - on select a form change subjects eligible for the form
+    changeHandler = function (first_time_call){
+        var sel = $("#selected_form>option:selected").val();
+        var set;
+
+        //find the form chosen
+        for (key in optionMap) if (key==sel) set = optionMap[key];
+        set.sort();
+
+        $('#selected_subj').empty();
+        $('#selected_subj').append($('<option>', {
+            value: 'Все предметы',
+            text: 'Все предметы'
+        }));
+
+        $.each(set, function (i, item) {
+            //if first call (load page) select the specified item
+            if (first_time_call && item==subj_sel)
+                $('#selected_subj').append($('<option>', {
+                    value: item,
+                    text: item,
+                    selected: true
+                }));
+            else
+            $('#selected_subj').append($('<option>', {
+                value: item,
+                text: item
+            }));
+        });
+    };
+
+    //marks for the chart
+    function prepareData(set) {
+        var names=[];
+        var marks=[];
+        var i=0;
+        for (var key in set) {
+            names[i]=key; marks[i++]=set[key];
+        }
+        return [names, marks];
+    }
+
+    //warning
+    function warnOnEmptyData(marks) {
+        if (marks.length==0) {
+            $( ".ct-chart" ).replaceWith( "<h3 style='color: #761c19'>Недостаточно информации для представления результатов!</h3>" );
+            return false;
+        }
+        return true;
+    }
+
+
+
+    //STARTING HERE+++++++++++++
+    //prepare data
+    //list of average marks
+    var rowData = [[${mymap}]];
+    //names and marks in []
+    var various_data = prepareData(rowData);
+    //map of form and corresponding subjects
+    var optionMap = [[${from_and_subjects}]];
+    //fill option elements
+    changeHandler(true);
+    //draw if data is filled
+    if (warnOnEmptyData(various_data[1])) drawChart(various_data[0], various_data[1]);
+
+
+})();
+
+</script>
+
+
+</body>
+</html>

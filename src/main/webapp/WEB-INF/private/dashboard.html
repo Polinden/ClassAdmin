@@ -1,0 +1,167 @@
+<!DOCTYPE html SYSTEM "http://www.thymeleaf.org/dtd/xhtml1-strict-thymeleaf-4.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" type="text/css" th:href="@{/private/css/bootstrap.min.css}"/>
+  <link rel="stylesheet" type="text/css" th:href="@{/private/css/bootstrap-theme.min.css}"/>
+  <link th:href="@{/private/css/fontawesome-all.min.css}" rel="stylesheet"/> 
+  <link th:href="@{/private/css/style-db.css}" rel="stylesheet"/>
+  <link th:href="@{/private/css/jquery.circliful.css}" rel="stylesheet"/>
+  <script th:src="@{/private/js/jquery.min.js}"></script>
+  <script th:src="@{/private/js/bootstrap.min.js}"></script>
+  <script th:src="@{/private/js/jquery.circliful.js}"></script>
+  <title>FMH</title>
+</head>
+
+<body>
+
+<div class="for_head gray">
+    <div class="for_title">
+        <img th:src="@{/private/icons/gerb.png}">  <h2 class="title">Классный администратор</h2>
+    </div>
+
+    <ul class="nav nav-tabs">
+        <li><a th:href="@{/admin/startpage}">Главная</a></li>
+        <li class="active"><a th:href="@{/admin/top.html?top=current}">Панель инвормации</a></li>
+        <li><a th:href="@{/goout}">Выход</a></li>
+    </ul>
+</div>
+
+
+<div class="main_bg container">
+    <div class="main_frame">
+        <div class="row">
+              <div class="col-md-4 col-xs-12">
+                <div class="info-box blue-bg">
+                  <i class="fa fa-child"></i>
+                  <div class="count">674</div>
+                  <div class="title">Учеников</div>
+                </div>
+              </div>
+              <div class="col-md-4 col-xs-12">
+                <div class="info-box facebook-bg">
+                  <i class="fa fa-user-tie"></i>
+                  <div class="count">43</div>
+                  <div class="title">Учителя</div>
+                </div>
+              </div>
+              <div class="col-md-4 col-xs-12">
+                <div class="info-box green-bg">
+                  <i class="fas fa-book"></i>
+                  <div class="count">1.426</div>
+                  <div class="title">Оценено уроков</div>
+                </div>
+              </div>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-2 col-md-3 col-xs-6 ">
+                <div id="test-circle"></div>
+            </div>
+            <div class="col-lg-2 col-md-3 col-xs-6">
+                <div id="test-circle2"></div>
+            </div>
+            <div class="col-lg-2 col-md-3 col-xs-6">
+                <div id="test-circle5"></div>
+            </div>
+
+            <div class="col-lg-2 col-md-3 col-xs-6" style="padding:2.6% 0 0 5.6rem">
+   	        <div class="round-button">
+			<div class="round-button-circle"><a href="#123" class="round-button">Уборка</a></div>
+  	   	</div>
+            </div>
+            <div class="col-lg-4 col-md-12 col-xs-12" style="padding: 2%">
+                <div class="row">
+                    <div class="col-xs-4">
+                        <div class="card" style="width: 12rem;">
+                          <div class="card-body">
+                           <img class="card-img-top" width=62%; th:src="@{/private/icons/backup.png}">
+                            <p class="card-text">Backup и диагностика выполняются ежедневно и сохраняется на <a class="card-link" href="https://dropbox.com">Dropbox</a></p>
+                          </div>
+                        </div>
+                    </div>
+                    <div class="col-xs-4">
+                        <div class="card" style="width: 12rem;">
+ 			  <img class="card-img-top" th:src="@{/private/icons/mail.png}" style="padding-top: 3px;" width="62%;">
+                          <div class="card-body">
+                            <p class="card-text"  style="margin-top: 8%">Не забывайте проверять  <a class="card-link" href="https://gmail.com">почту</a>, в которой могут быть запросы на восстановление паролей</p>
+                          </div>
+                        </div>
+                    </div>
+                    <div class="col-xs-4">
+                        <div class="card" style="width: 12rem;">
+                          <img class="card-img-top" width=82%; th:src="@{/private/icons/deploy.png}">
+                          <div class="card-body">
+                            <p class="card-text">База данных и операционная  <a class="card-link" href="https://firstvds.ru">система</a> требуют обслуживания в режиме администратора</p>
+                          </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+
+
+<div class="footer">
+  <p>   Все права защищены.    Администратор системы: formasterhelper@gmail.com.    2017-2018</p>
+</div>
+
+<script th:inline="javascript">
+  $( document ).ready(function() {
+        $("#test-circle").circliful({
+            animation: 1,
+            animationStep: 5,
+            backgroundColor: 'darkgray',
+            foregroundBorderWidth: 15,
+            backgroundBorderWidth: 15,
+            text: 'Охвачено предметов',
+            textColor: '#666',
+            fontColor: '#000',
+            textBelow: true,
+            percent: 38
+        });
+        $("#test-circle2").circliful({
+            animation: 1,
+            animationStep: 6,
+            foregroundBorderWidth: 5,
+            backgroundBorderWidth: 1,
+            iconColor: '#94b8b8',
+            backgroundColor: 'darkgray',
+            text: 'Используют учителя',
+            textBelow: true,
+            icon: 'f109',
+            iconSize: '40',
+            iconPosition: 'middle',
+            fontColor: '#000',
+            percent: 47
+        });
+      $("#test-circle5").circliful({
+            animationStep: 5,
+            foregroundBorderWidth: 5,
+            backgroundBorderWidth: 15,
+            backgroundColor: 'darkgray',
+            icon: 'f0a0',
+            iconColor: '#3498DB',
+            iconPosition: 'middle',
+            text: 'Занято диска',
+            textBelow: true,
+            fontColor: '#000',
+            percent: 72
+
+       });
+
+});
+</script>
+
+</body>
+</html>
+
+

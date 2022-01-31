@@ -1,0 +1,277 @@
+<!DOCTYPE html SYSTEM "http://www.thymeleaf.org/dtd/xhtml1-strict-thymeleaf-4.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+
+
+<head>
+    <link rel="stylesheet" type="text/css" th:href="@{/private/css/bootstrap.min.css}"/>
+    <link rel="stylesheet" type="text/css" th:href="@{/private/css/bootstrap-theme.min.css}"/>
+    <link rel="stylesheet" type="text/css" th:href="@{/private/css/datatables.min.css}"/>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>FMH</title>
+
+    <style type="text/css">
+        html, body {background-color: burlywood; height: 100%}
+        html, body {min-width: 70em;}
+
+        .for_title img {margin-right: 3%}
+        .nav li {font-size: 120%; font-weight: 700}
+        .for_title {padding: 1em}
+        .title {display: inline-block; color: white; font-weight: 800}
+        .for_head {min-height: 10%}
+        .for_head li a {color: white}
+        .for_head li a:hover {color: steelblue}
+        .active * {background-color: burlywood !important;}
+
+        .main_bg {background-color: burlywood; display: inline-block; width: 100%; height: 85%; min-height: 40em; padding: 5%}
+        .main_frame {background-color: burlywood; display: inline-block; width: 100%; height: 30%; min-height: 10em; padding-left: 1%; padding-right: 1%}
+
+        fieldset {border:groove; border-width: 2px; border-color: white;}
+        legend {font-size: 1em; color: steelblue; width: 8em; margin:  0px; padding: 0; color: gray; padding-left: 3px; margin-left: 10px; display:inline; border: none;}
+        thead > tr > th {color: dimgray}
+
+        #for_chart {text-align: center; margin: 0}
+        .for_buttons {text-align: right}
+        .hidden {  display: none !important;  visibility: hidden !important;}
+        button {width: 135px; margin-left: 15px; margin-bottom: 10px!important;}
+
+        .gray {
+        background: #94b8b8;
+        background: -moz-linear-gradient(top,  #94b8b8 0%, #476b6b 100%);
+        background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#94b8b8), color-stop(100%,#476b6b));
+        background: -webkit-linear-gradient(top,  #94b8b8 0%,#476b6b 100%);
+        background: -o-linear-gradient(top,  #94b8b8 0%,#476b6b 100%);
+        background: -ms-linear-gradient(top,  #94b8b8 0%,#476b6b 100%);
+        background: linear-gradient(top,  #94b8b8 0%,#476b6b 100%);
+        }
+
+    </style>
+
+
+
+</head>
+<body>
+
+<div class="for_head gray">
+    <div class="for_title">
+        <img th:src="@{/private/icons/gerb.png}">  <h2 class="title">Классный администратор</h2>
+    </div>
+
+    <ul class="nav nav-tabs">
+        <li><a th:href="@{/admin/startpage}">Главная</a></li>
+        <li class="active"><a th:href="@{/admin/top.html?top=current}">График</a></li>
+        <li><a th:href="@{/goout}">Выход</a></li>
+    </ul>
+</div>
+
+
+<div class="main_bg container">
+    <div class="main_frame">
+        <div class="row">
+            <div class="col-xs-5">
+                <h3>Лучшие 20 учеников</h3>
+                <h4>По показателям среднего бала за текущий учебный год</h4>
+            </div>
+            <div class="col-xs-6 col-xs-offset-1 for_buttons">
+                <form method="get" id="my_form">
+                    <input hidden id="top" type="type" name="top"/>
+                    <button class="cur_top btn btn-warning">Все оценки</button>
+                    <button class="top_top btn btn-warning">Тематические</button>
+                    <button class="forXLS btn btn-info">XLS отчет</button>
+                </form>
+            </div>
+        </div>
+        <div class="row">
+            <br/>
+            <div id="for_chart">
+                <svg id="chart" width="945" height="460"/>
+            </div>
+            <br/><br/><br/>
+        </div>
+        </div>
+    </div>
+</div>
+
+
+
+<script src="https://d3js.org/d3.v4.min.js"></script>
+<script th:inline="javascript">
+
+    //path
+    var path1=/*[[@{/get_XLS_top}]]*/;
+    var path2=/*[[@{/admin/top.html?top=topic}]]*/;
+    var path3=/*[[@{/admin/top.html?top=current}]]*/;
+    //data
+    var picture=/*[[@{/private/icons/student.svg}]]*/;
+    var topdata = [[${top}]];
+
+    (function () {
+
+        //START HERE+++++++++++++++++++++++++++++++++++++++++++++++++
+        //prepare data
+        var datX = []; var datT = [];
+        for (key in topdata) {datX.push(topdata[key]); datT.push(key);}
+        var i=datT.length;
+        var dTT=[];
+        while (i--) dTT[i]={data:datX[i], text: datT[i]};
+        shuffle(dTT);
+
+        //draw
+        drowChart();
+        drawTitle();
+
+
+        //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        //FUNCTIONS AND HELPERS
+        function drowChart() {
+
+            //bar width and height
+            var barnumber=20;
+            var bar_ivl=4;
+            var h=d3.select("svg").attr('height')-5;
+            var bw=(d3.select("svg").attr('width')-5)/barnumber-bar_ivl;
+
+            //check before...
+            if (warnOnEmptyData(datT, datX)) return;
+
+            //scale
+            var max=Math.max.apply(null, datX);
+            var min=Math.min.apply(null, datX);
+            min=(min-1)<1? min:(min-1);
+            var sc1 =   d3.scaleLinear()
+                .domain([min,max])
+                .range([0,230]);
+
+
+            d3.select("svg")
+                .selectAll("rect")
+                .data(dTT)
+                .enter()
+                .append("rect")
+                .attr("x", function (d, i) {return bw + bw * i;})
+                .attr("y", h)
+                .attr("ry", 10)
+                .attr("width", bw - bar_ivl)
+                .attr("height", function (d, i) {return sc1(d.data);})
+                .attr("fill", function (d, i) {return 'hsl(' + i * 3 + "" + ', 100%, 50%)'})
+                .attr("stroke", 'gray')
+                .transition()
+                .duration(1000)
+                .attr("y", function (d, i) {return h - sc1(d.data);});
+
+
+            d3.select("svg")
+                .selectAll('image')
+                .data(dTT)
+                .enter()
+                .append('image')
+                .attr("x", function (d, i) {return bw - bar_ivl + bw * i;})
+                .attr("y", h - bw * 1.4)
+                .attr("width", bw)
+                .attr("height", bw*1.4)
+                .attr("xlink:href", picture)
+                .transition()
+                .duration(1000)
+                .attr("y", function (d, i) {return h - sc1(d.data) - bw * 1.4;});
+
+            d3.select("svg")
+                .selectAll('text')
+                .data(dTT)
+                .enter()
+                .append("text")
+                .transition()
+                .delay(1200)
+                .duration(0)
+                .text(function (d, i) {return d.text})
+                .attr("x", function (d, i) {return 1.5 * bw + bw * i;})
+                .attr("y", function (d, i) {return h - sc1(d.data) - bw * 1.4;})
+                .attr("font-family", "arial")
+                .attr("transform", function (d, i) {
+                    return "rotate(270, " + (1.5 * bw + bw * i) + "," + (h - sc1(d.data) - bw * 1.4) + ")";
+                });
+        }
+
+
+
+
+        //warning
+        function warnOnEmptyData(series, marks) {
+            if (series.length==0 || marks.length==0) {
+                d3.select("#chart").remove();
+                d3.select("#for_chart")
+                    .append("h3")
+                    .style("color", "#761c19")
+                    .text("Недостаточно информации для построения рейтинга!");
+                return true;
+            }
+            return false;
+        }
+
+
+        //randomize data positions
+        function shuffle(a) {
+            var j, x, i;
+            for (i = a.length; i; i--) {
+                j = Math.floor(Math.random() * i);
+                x = a[i - 1];
+                a[i - 1] = a[j];
+                a[j] = x;
+            }
+        }
+
+
+        //draw title
+        function drawTitle(){
+            //as the page have 2 modes, then
+            //depending on query parameter
+            var queryString = window.location.search;
+            var partquery=queryString.split("?top=")[1];
+            //select title and hide odd button basing on users chise (topic or current marks)
+            if (partquery=='topic') {
+                d3.select('h4').text('По тематическим оценкам за текущий учебный год');
+                d3.select(".top_top").classed('hidden', true);
+            }
+            else {
+                d3.select('h4').text('По всем оценкам за текущий учебный год');
+                d3.select(".cur_top").classed('hidden', true);
+            }
+        }
+
+
+        //handlers
+        //for the form submition
+        var froXLS=function () {
+            var form = document.getElementById("my_form");
+            form.action = path1;
+            form.submit();
+        };
+        d3.select(".forXLS").on('click', froXLS);
+
+        //get top marks rating
+        var topTop=function () {
+            var form = document.getElementById("my_form");
+            form.action = path2;
+            d3.select("#top").attr('value', 'topic');
+            form.submit();
+        };
+        d3.select(".top_top").on('click', topTop);
+
+        //get current marks rating
+        var curTop=function () {
+            var form = document.getElementById("my_form");
+            form.action = path3;
+            d3.select("#top").attr('value', 'current');
+            form.submit();
+        };
+        d3.select(".cur_top").on('click', curTop);
+
+
+
+    })();
+
+</script>
+
+</body>
+</html>

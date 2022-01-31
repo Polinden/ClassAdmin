@@ -1,0 +1,250 @@
+<!DOCTYPE html SYSTEM "http://www.thymeleaf.org/dtd/xhtml1-strict-thymeleaf-4.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+
+
+<head>
+    <link rel="stylesheet" type="text/css" th:href="@{/private/css/bootstrap.min.css}"/>
+    <link rel="stylesheet" type="text/css" th:href="@{/private/css/bootstrap-theme.min.css}"/>
+    <link  rel="stylesheet" th:href="@{/private/chartist/chartist-plugin-tooltip.css}">
+    <link  rel="stylesheet" th:href="@{/private/chartist/chartist.min.css}">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>FMH</title>
+
+    <style type="text/css">
+        html, body {background-color: burlywood; height: 100%}
+        body {min-width: 70em;}
+
+        .for_title img {margin-right: 3%}
+        .nav li {font-size: 120%; font-weight: 700}
+        .for_title {padding: 1em}
+        .title {display: inline-block; color: white; font-weight: 800}
+        .for_head {min-height: 10%}
+        .for_head li a {color: white}
+        .for_head li a:hover {color: steelblue}
+        .active * {background-color: burlywood !important;}
+
+        .main_bg {background-color: burlywood; display: inline-block; width: 100%; height: 85%; min-height: 40em; padding: 5%}
+        .main_frame {background-color: burlywood; display: inline-block; width: 100%; height: 30%; min-height: 10em; padding-left: 1%; padding-right: 1%}
+
+        fieldset {border:groove; border-width: 2px; border-color: white;}
+        legend {font-size: 1em; color: steelblue; width: 8em; margin:  0px; padding: 0; color: gray; padding-left: 3px; margin-left: 10px; display:inline; border: none;}
+
+        .ct-label{font-size:0.8em; fill: black}
+        button {margin-top: 5px!important; width: 135px}
+
+        .gray {
+        background: #94b8b8;
+        background: -moz-linear-gradient(top,  #94b8b8 0%, #476b6b 100%);
+        background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#94b8b8), color-stop(100%,#476b6b));
+        background: -webkit-linear-gradient(top,  #94b8b8 0%,#476b6b 100%);
+        background: -o-linear-gradient(top,  #94b8b8 0%,#476b6b 100%);
+        background: -ms-linear-gradient(top,  #94b8b8 0%,#476b6b 100%);
+        background: linear-gradient(top,  #94b8b8 0%,#476b6b 100%);
+        }
+
+    </style>
+
+
+
+</head>
+<body>
+
+<div class="for_head gray">
+    <div class="for_title">
+        <img th:src="@{/private/icons/gerb.png}">  <h2 class="title">Классный администратор</h2>
+    </div>
+
+    <ul class="nav nav-tabs">
+        <li><a th:href="@{/admin/startpage}">Главная</a></li>
+        <li class="active"><a th:href="@{/admin/benchmarks/percentage.html}">График</a></li>
+        <li><a th:href="@{/goout}">Выход</a></li>
+    </ul>
+</div>
+
+
+<div class="main_bg container">
+    <div class="main_frame">
+        <div class="row">
+            <div class="col-xs-6">
+                <h3>Процентный анализ оценок</h3>
+                <h4>Процент учеников с определенным средним балом</h4>
+                <br/>
+                <div id="mychart" class="ct-chart"></div>
+                <br/>
+            </div>
+            <div class="col-xs-3">
+            </div>
+            <div class="col-xs-3">
+                <h3 th:text="'Класс '+${sform}"></h3>
+                <h3 style="color: #761c19" th:text="${ssubj}"></h3>
+                <br/><br/>
+                <form method="get"  th:action="@{/admin/benchmarks/percentage.html}">
+                    <fieldset>
+                        <legend>Виберите класс</legend>
+                        <div class="form-group" style="padding: 2em">
+                            <label for="selected_form">Классы</label>
+                            <select class="form-control" onchange="changeHandler(false)" name="sel_form" id="selected_form">
+                                <option th:each="iter : ${from_and_subjects}" th:value="${iter.key}"
+                                        th:text="${iter.key}" th:selected="${iter.key}==${sform}">
+                                </option>
+                            </select>
+                            <br/>
+                            <label for="selected_subj">Предметы</label>
+                            <select class="form-control" name="sel_subj" id="selected_subj">
+                                <option>
+                                </option>
+                            </select>
+                            <br/>
+                            <label class="checkbox-inline">
+                                <input type="checkbox" value="topic" id="checkbox_topic" name="ch_topic" th:checked="${ch_topic}"/>
+                                Тематические
+                            </label>
+                            <br/><br/>
+                            <button type="submit" class="btn btn-warning">Открыть</button>
+                        </div>
+                    </fieldset>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<script th:src="@{/private/js/jquery.min.js}"></script>
+<script th:src="@{/private/chartist/chartist.min.js}"></script>
+<script th:src="@{/private/chartist/chartist-plugin-tooltip.js}"></script>
+<script th:src="@{/private/js/d3.min.js}"></script>
+<script th:src="@{/private/js/d3pie.min.js}"></script>
+<script th:inline="javascript">
+
+
+//for element select 'onchange'
+var changeHandler;
+//selected subject
+var subj_sel=[[${ssubj}]];
+
+(function() {
+
+    //set variables
+    var datum = [];
+
+    //draw chart
+    function drawChart() {
+        //option 1 - CHARTIST
+        //options for chartist pie
+        //var options = {
+        //    width: '40em',
+        //    height: '40em',
+        //    chartPadding: 80,
+        //    labelOffset: 120,
+        //    labelDirection: 'explode',
+        //    labelInterpolationFnc: function (value) {return value;}
+        //};
+        //var pie = new Chartist.Pie('.ct-chart', datum, options);
+
+        //option 2 - D3PAI
+        var pie = new d3pie("mychart", {
+            data: {
+                content: datum
+            }
+        });
+    }
+
+    //helpers
+    //set handler - on select a form change subjects eligible for the form
+    changeHandler = function (first_time_call){
+        var sel = $("#selected_form>option:selected").val();
+        var set;
+
+        //find the form chosen
+        for (key in optionMap) if (key==sel) set = optionMap[key];
+        set.sort();
+
+        $('#selected_subj').empty();
+        $('#selected_subj').append($('<option>', {
+            value: 'Все предметы',
+            text: 'Все предметы'
+        }));
+        //fill in items
+        $.each(set, function (i, item) {
+            //if first call (load page) select the specified item
+            if (first_time_call && item==subj_sel)
+                $('#selected_subj').append($('<option>', {
+                    value: item,
+                    text: item,
+                    selected: true
+                }));
+            else
+            $('#selected_subj').append($('<option>', {
+                value: item,
+                text: item
+            }));
+        });
+    };
+
+    //prepare data
+    function prepareData(data) {
+        //prepare data for the chart
+        var thePerList = [];
+        for (var i = 0; i < data.length; i++) {
+            thePerList[i] = Math.round(data[i] * 1000) / 10.0 + '%';
+            data[i] = (Math.round(data[i] * 1000) / 10.0);
+        }
+        var labs = ['10..12', '7..9', '4..6', '0..3'];
+
+        //option 1 - CHARTIST
+        //var datum = {labels: [], series: []};
+        //for (var i=0; i<data.length; i++) {
+        //    if (data[i]<0.01) continue;
+        //    dataum.labels.push(labs[i]+thePerList[i]);
+        //    dataum.series.push(data[i]);
+        //}
+
+
+        //option 2 - D3PIE
+        for (var i = 0; i < rowData.length; i++) {
+            if (rowData[i] < 0.01) continue;
+            datum.push({label: labs[i], value: rowData[i]});
+        }
+    }
+
+    //warning on no data
+    function emptyRemark() {
+        //option 1 - CHARTIST
+        //if (datum.labels.length==0) {
+        //option 2 - D3PIE
+        if (datum.length==0) {
+            $( ".ct-chart" ).replaceWith( "<h3 style='color: #761c19'>Недостаточно информации для представления результатов!</h3>" );
+            return false;
+        }
+        return true;
+    }
+
+
+
+    //STARTING HERE
+    //set variables
+    //list of average marks
+    var rowData = [[${mymap}]];
+    //map of form and corresponding subjects
+    var optionMap = [[${from_and_subjects}]];
+    //fill option elements
+    changeHandler(true);
+    prepareData(rowData);
+    //if no data or zero then inform user
+    if (emptyRemark()) drawChart();
+
+
+})();
+
+
+
+</script>
+
+
+</body>
+</html>

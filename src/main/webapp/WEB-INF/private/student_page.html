@@ -1,0 +1,271 @@
+<!DOCTYPE html SYSTEM "http://www.thymeleaf.org/dtd/xhtml1-strict-thymeleaf-4.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+
+
+<head>
+    <link rel="stylesheet" type="text/css" th:href="@{/private/css/bootstrap.min.css}"/>
+    <link rel="stylesheet" type="text/css" th:href="@{/private/css/bootstrap-theme.min.css}"/>
+    <link rel="stylesheet" type="text/css" th:href="@{/private/css/datatables.min.css}"/>
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"/>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>FMH</title>
+
+
+
+    <style type="text/css">
+        html, body {background-color: burlywood; height: 100%}
+        body {min-width: 70em;}
+
+        .nav li {font-size: 120%; font-weight: 700}
+        .for_title {padding: 1em}
+        .title {display: inline-block; color: white; font-weight: 800}
+        .for_head {background-color: cadetblue; min-height: 10%}
+        .for_head li a {color: white}
+ 	.for_head li a:hover {color: #476b6b}
+
+        .active * {background-color: burlywood !important;}
+
+        .main_bg {background-color: burlywood; display: inline-block; width: 100%; height: 85%; min-height: 52em; padding: 2%}
+        .for_internal span {color: midnightblue}
+
+        .for_internal img, for_title img {margin-right: 2%; margin-left: 2%}
+        .for_title img {margin-right: 3%}
+        .form-group label {min-width: 5em}
+
+        input {margin-right: 2%; float: left}
+        td {text-align: left; cursor: pointer}
+        .has-error label {color: darkred}
+
+       .gray {
+        background: #94b8b8;
+        background: -moz-linear-gradient(top,  #94b8b8 0%, #476b6b 100%);
+        background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#94b8b8), color-stop(100%,#476b6b));
+        background: -webkit-linear-gradient(top,  #94b8b8 0%,#476b6b 100%);
+        background: -o-linear-gradient(top,  #94b8b8 0%,#476b6b 100%);
+        background: -ms-linear-gradient(top,  #94b8b8 0%,#476b6b 100%);
+        background: linear-gradient(top,  #94b8b8 0%,#476b6b 100%);
+        }
+
+    </style>
+
+
+
+
+</head>
+<body>
+
+<div class="for_head gray">
+    <div class="for_title">
+        <img th:src="@{/private/icons/gerb.png}">  <h2 class="title">Классный администратор</h2>
+    </div>
+
+    <ul class="nav nav-tabs">
+        <li><a th:href="@{/admin/startpage}">Главная</a></li>
+        <li><a th:href="@{/admin/subjects_page}">Предметы</a></li>
+        <li><a th:href="@{/admin/prepod_page}">Преподаватели</a></li>
+        <li><a th:href="@{/admin/schedule_page}">Расписание</a></li>
+        <li class="active"><a th:href="@{/admin/student_page}">Ученики</a></li>
+        <li><a th:href="@{/goout}">Выход</a></li>
+    </ul>
+</div>
+
+
+
+<!-- FORM -->
+<form id="my_form" role="form" method="post" autocomplete="off">
+    <!-- cratch for dissabling autofill -->
+    <input type="text" style="display:none">
+    <input type="password" style="display:none">
+
+
+    <div class="main_bg container">
+        <!-- SPINNER -->
+        <div class="spinner" style="text-align: center; position: absolute; top: 40px; right: 10px; width: 70px">
+            <i class="fa fa-refresh fa-spin" style="font-size:36px; color: #23527c"></i>
+        </div>
+        <div class="for_spinner" style="opacity: 0; min-height: 34em">
+
+            <table id="mainTable" class="display" cellspacing="0" width="100%">
+                <thead>
+                <th hidden></th>
+                <th hidden></th>
+                <th style="width: 8%">Класс</th>
+                <th style="width: 20%">Фамилия</th>
+                <th style="width: 18%">Имя</th>
+                <th style="width: 18%">Отчество</th>
+                <th style="width: 16%">Логин</th>
+                <th hidden></th>
+                </thead>
+
+                <tfoot>
+                <th hidden></th>
+                <th hidden></th>
+                <th style="width: 8%">Класс</th>
+                <th style="width: 20%">Фамилия</th>
+                <th style="width: 18%">Имя</th>
+                <th style="width: 18%">Отчество</th>
+                <th style="width: 16%">Логин</th>
+                <th hidden></th>
+                </tfoot>
+
+            </table>
+
+        </div>
+
+
+        <hr>
+
+
+        <div class="col-xs-12" hidden>
+            <input type="text" name="exlogin" id="name_to_replace">
+        </div>
+        <div class="col-xs-12" hidden>
+            <input type="text" name="exform" id="form_to_replace">
+        </div>
+        <div class="row">
+            <div class="col-xs-1">
+                <div class="form-group">
+                    <label for="forms">Класс</label>
+                    <select class="form-control" name="form" required id="forms">
+                        <option th:each="class : ${classes}">
+                            <span th:text="${class}"></span>
+                        </option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-xs-3">
+                <div class="form-group">
+                    <label for="surname">Фамилия</label>
+                    <input type="text" maxlength="50" class="form-control" id="surname" required name="fst_name" placeholder="Фамилия">
+                </div>
+            </div>
+
+            <div class="col-xs-2">
+                <div class="form-group">
+                    <label for="name">Имя</label>
+                    <input type="text" maxlength="50" class="form-control" id="name" name="scd_name" required placeholder="Имя">
+                </div>
+            </div>
+            <div class="col-xs-2">
+                <div class="form-group">
+                    <label for="fname">Отчество</label>
+                    <input type="text" maxlength="50" class="form-control" id="fname" name="thd_name" required placeholder="Отчество">
+                </div>
+            </div>
+            <div class="col-xs-2">
+                <div class="form-group">
+                    <label for="login">Логин</label>
+                    <input type="text" maxlength="20" class="form-control" id="login" name="login" required placeholder="Логин" autocomplete="off">
+                </div>
+            </div>
+            <div class="col-xs-2">
+                <div class="form-group">
+                    <label for="passw">Пароль</label>
+                    <input type="text" maxlength="20" class="form-control" id="passw" name="passwd" required placeholder="Пароль" autocomplete="off">
+                </div>
+            </div>
+        </div>
+
+
+        <div class="row">
+            <div class="col-xs-12"><p></p></div>
+        </div>
+
+
+        <div class="row">
+            <div class="col-xs-offset-2 col-xs-2 s">
+                <button style="width: 100%" type="button" class="inserter btn btn-primary">Вставить</button>
+            </div>
+            <div class="col-xs-2 s">
+                <button style="width: 100%" type="button" class="replacer btn btn-info">Заменить</button>
+            </div>
+            <div class="col-xs-2">
+                <button style="width: 100%" type="button" class="deleter btn btn-warning">Удалить</button>
+            </div>
+            <div class="col-xs-2">
+                <button style="width: 100%" type="button" class="totaldel btn btn-danger">Удалить класс</button>
+            </div>
+            <div class="col-xs-2">
+                <button style="width: 100%" type="button" class="btn btn-success to_changer" data-toggle="modal" data-target="#myModal">Перевести класс</button>
+            </div>
+        </div>
+
+    </div>
+
+
+
+
+    <!-- Modal -->
+    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title" id="myModalLabel">В какой класс перевести?</h4>
+                </div>
+                <div class="modal-body">
+
+                    <div class="form-group">
+                        <label for="new_forms">Класс</label>
+                        <select class="form-control" name="selected" required id="new_forms">
+                            <option th:each="class: ${classes}">
+                                <span th:text="${class}"></span>
+                            </option>
+                        </select>
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Закрыть</button>
+                    <button type="button" class="changer btn btn-primary">Дальше</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+</form>
+
+
+
+
+<script th:src="@{/private/js/jquery.min.js}"></script>
+<script th:src="@{/private/js/bootstrap.min.js}"></script>
+<script th:src="@{/private/js/datatables.min.js}"></script>
+<script th:src="@{/private/js/bootbox.min.js}"></script>
+<script th:src="@{/private/js/student.js}"></script>
+<script th:inline="javascript">
+
+    //we are setting up path variables for the form sending
+    //theamleaf stile was used for changing script to add path to the from requisites
+    var path1=/*[[@{/del_student_list}]]*/;
+    var path2=/*[[@{/ins_student_list}]]*/
+    var path3=/*[[@{/upd_student_list}]]*/;
+    var path4=/*[[@{/del_all_form}]]*/;
+    var path5=/*[[@{/ch_all_form}]]*/;
+    var revertTo1= [[${revertto1}]];
+    var revertTo2= [[${revertto2}]];
+
+
+    $(document).ready(function() {
+        //preparing json data
+        var data_ft= [];
+        var theList = [[${students}]];
+        for (var i = 0; i < theList.length; i++) {
+            data_ft[i] = {
+                'l_replace': theList[i].login, 'f_replace': theList[i].form, 'form': theList[i].form, 'fname': theList[i].fst_name,
+                'sname': theList[i].scd_name, 'tname': theList[i].thd_name, 'login': theList[i].login,
+                'paswd': theList[i].passwd
+            };
+        }
+        //starting module student.js
+        initMe(data_ft);
+    });
+
+</script>
+
+</body>
+</html>

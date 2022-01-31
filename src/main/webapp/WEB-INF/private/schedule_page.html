@@ -1,0 +1,388 @@
+<!DOCTYPE html SYSTEM "http://www.thymeleaf.org/dtd/xhtml1-strict-thymeleaf-4.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+
+
+<head>
+    <link rel="stylesheet" type="text/css" th:href="@{/private/css/bootstrap.min.css}"/>
+    <link rel="stylesheet" type="text/css" th:href="@{/private/css/bootstrap-theme.min.css}"/>
+    <link rel="stylesheet" type="text/css" th:href="@{/private/themes/default/style.min.css}" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"/>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>FMH</title>
+
+
+    <style type="text/css">
+        html, body {background-color: burlywood; height: 100%}
+        body {min-width: 70em;}
+
+        .nav li {font-size: 120%; font-weight: 700}
+        .for_title {padding: 1em}
+        .title {display: inline-block; color: white; font-weight: 800}
+        .for_head {min-height: 10%}
+        .for_head li a {color: white}
+ 	.for_head li a:hover {color: #476b6b}
+        .active * {background-color: burlywood !important;}
+
+        .main_bg {background-color: burlywood; display: inline-block; width: 100%; height: 82%; min-height: 50em; min-width: 70em; padding: 3%;}
+        .for_internal span {color: midnightblue}
+
+        .for_internal img, for_title img {margin-right: 2%; margin-left: 2%}
+        .for_title img {margin-right: 3%}
+        .form-group label {min-width: 5em}
+
+        input {margin-right: 2%; float: left}
+        td {text-align: left; cursor: pointer}
+        span {font-weight: 700; font-size: 105%}
+	    li a > span {color: steelblue; font-weight: 700}
+
+        .for_tree {height: 100%; background: whitesmoke; overflow: auto; border: inset; border-width: 1px}
+        .for_middle {height: 100%; padding: 1em; padding-top: 10%; border: solid; border-width: 2px; border-color: white}
+        .for_right {height: 100%; background: whitesmoke; overflow: auto; border: inset; border-width: 1px; padding: 1em;}
+        .for_check {margin-right: 2em}
+
+        .btn100 {margin: 0.5em; width: 100%; min-width: 7em;}
+        .for_buttons {margin-top: 10%}
+        #for_teacher_name, #for_subject_name {text-align: center; min-height: 1em}
+        #for_subject_name {font-weight: 600; color: darkblue}
+        #for_teacher_name {font-weight: 800}
+
+	    #jstree ul li {font-weight: 800 }
+	    #jstree ul li ul li {font-weight: 400 }
+        li span i {padding-left:5px}
+
+        .onehundred {height: 100%}
+        .for_picture {padding: 1em; text-align: center}
+
+        fieldset {border:solid; border-width: 2px; border-color: lightgray; margin: 0; padding: 0; margin-top: 5px; margin-bottom: 10px}
+        legend {font-size: 1em; margin:  2px; padding: 0; color: gray; margin-left: 30px; width: 130px; display:inline}
+
+	.gray {
+        background: #94b8b8;
+        background: -moz-linear-gradient(top,  #94b8b8 0%, #476b6b 100%);
+        background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#94b8b8), color-stop(100%,#476b6b));
+        background: -webkit-linear-gradient(top,  #94b8b8 0%,#476b6b 100%);
+        background: -o-linear-gradient(top,  #94b8b8 0%,#476b6b 100%);
+        background: -ms-linear-gradient(top,  #94b8b8 0%,#476b6b 100%);
+        background: linear-gradient(top,  #94b8b8 0%,#476b6b 100%);
+        }
+
+    </style>
+
+
+</head>
+<body>
+
+
+<!-- SPINNER -->
+<div class="spinner" style="text-align: center; position: absolute; top: 40px; right: 20px; width: 70px">
+    <i class="fa fa-refresh fa-spin" style="font-size:36px; color: #23527c"></i>
+</div>
+
+
+<div class="for_head gray">
+    <div class="for_title">
+        <img th:src="@{/private/icons/gerb.png}">  <h2 class="title">Классный администратор</h2>
+    </div>
+
+    <ul class="nav nav-tabs">
+        <li><a th:href="@{/admin/startpage}">Главная</a></li>
+        <li><a th:href="@{/admin/subjects_page}">Предметы</a></li>
+        <li><a th:href="@{/admin/prepod_page}">Преподаватели</a></li>
+        <li class="active"><a th:href="@{/admin/schedule_page}">Расписание</a></li>
+        <li><a th:href="@{/admin/student_page}">Ученики</a></li>
+        <li><a th:href="@{/goout}">Выход</a></li>
+    </ul>
+</div>
+
+
+<div class="main_bg container">
+    <div class="row onehundred">
+        <div class="col-xs-4 for_tree">
+            <fieldset style="opacity: 0">
+                <legend>Виберите предмет</legend>
+                    <div id="jstree" style="opacity: 0">
+                        <ul>
+                            <li class="for_fl" th:each="sched : ${schedules}">
+                                <p class="for_name_shown" th:text="${sched.teachersname}"></p>
+                                <span class="for_log_hide" hidden th:text="${sched.teacher.login}"></span>
+                                <ul>
+                                    <li class="for_sl" th:each="subjs : ${sched.subj_forms_map}">
+                                        <span class="target_node" th:text="${subjs.key}"></span>
+                                        <ul>
+                                            <li th:each="classes : ${subjs.value}" th:if="${classes}!=''">
+                                                <p th:text="${classes}"></p>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </div>
+            </fieldset>
+        </div>
+
+
+
+
+
+        <div class="col-xs-6 onehundred">
+            <div class="for_middle">
+                <div class="row">
+                    <h2 id="for_teacher_name">  </h2>
+                    <h3 id="for_subject_name">  </h3>
+                </div>
+                <div class="row for_buttons">
+                    <div class="col-xs-3 onehundred">
+                        <button type="button" disabled class="btn btn100 scheduler btn-info">Открыть</button>
+                        <button type="button" class="btn btn100 closer btn-default">Свернуть</button>
+                        <button type="button" class="btn btn100 opener btn-default">Развернуть</button>
+                    </div>
+                    <div class="col-xs-6 onehundred for_picture">
+                        <img th:src="@{/private/icons/teacher.png}" width="50%;">
+                    </div>
+                    <div class="col-xs-3 onehundred" style="padding-right: 2em; padding-left: 0">
+                        <button type="button" disabled class="btn btn100 cleaner btn-warning">Очистить</button>
+                        <button type="button" disabled class="btn btn100 saver btn-success">Сохранить</button>
+          		        <button type="button" disabled class="btn btn100 deleter btn-danger">Удалить</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
+        <div class="col-xs-2 for_right">
+
+        <!-- FORM-->
+            <form role="form" name="my_form" id="my_form" th:action="@{/get_class_list}" method="post"  th:object="${my_form}">
+                <div hidden>
+                    <input type="text" required class="form-control" id="p_name" th:field="*{teacher}">
+                    <input type="text" required class="form-control" id="p_subj" th:field="*{subject}">
+		    <input type="text" required class="form-control" id="p_login" th:field="*{login}">
+                </div>
+                <div id="for_checks" style="opacity: 0">
+                    <div class="for_check" th:each="class : *{formes}">
+                        <input th:id="${class.name}" class="for_checked" type="checkbox" name="newly_checked" th:checked="${class.checked}" th:value="${class.name}">
+                        <label th:for="${class.name}" th:text="${class.name}"></label>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+
+    </div>
+
+</div>
+
+
+
+
+
+<script th:src="@{/private/js/jquery.min.js}"></script>
+<script th:src="@{/private/js/bootstrap.min.js}"></script>
+<script th:src="@{/private/js/jstree.min.js}"></script>
+<script th:src="@{/private/js/bootbox.min.js}"></script>
+<script th:inline="javascript">
+
+
+
+var teacher_name='';
+var subject_name='';
+var teacher_login='';
+var scrollTree;
+var sending=false;
+
+
+//trim polyfill
+if (!String.prototype.trim) {
+    (function() {
+        String.prototype.trim = function() {
+            return this.exlogin(/^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g, '');
+        };
+    })();
+}
+
+
+//confirm
+function confirmMe(text, callback){
+    bootbox.confirm({
+        message: text,
+        buttons: {
+            cancel: {
+                label: 'Нет',
+                className: 'btn-success'
+            },
+            confirm: {
+                label: 'Да',
+                className: 'btn-danger'
+            }
+        },
+        callback: callback
+    });
+}
+
+
+$(document).ready(function(){
+
+
+    //handlers
+    //delete item
+         var upDeleter = function () {
+         confirmMe("Вы хотите удалить предмет \n"+$('#p_subj').val()+"?", function(result) {
+             if (result) {
+                 //sending form
+                 if (sending) return;
+                 sending=true;
+                 //as we are sending deleting to another path
+                 //theamleaf stile was used for changing script to add path to the from requisites
+                 var form = document.getElementById("my_form");
+                 form.action =/*[[@{/del_class_list}]]*/;
+                 form.submit();
+             }
+         });
+     };
+     $(".deleter").click(upDeleter);
+
+
+     //save item
+     var upDater = function () {
+         if (teacher_login.trim().length=0) return;
+         //sending form
+         if (sending) return;
+         sending=true;
+         var form = document.getElementById("my_form");
+	     //as we are sending saving to another path
+         //theamleaf stile was used for changing script to add path to the from requisites
+         form.action=/*[[@{/upd_class_list}]]*/;
+         form.submit();
+     };
+     $(".saver").click(upDater);
+
+
+     //unfold tree
+     var setUnFolder = function () {
+         $(".for_fl").each(function (i, el) {
+             $('#jstree').jstree("open_node", el);
+         });
+     };
+     $(".opener").click(setUnFolder);
+
+
+     //fold tree
+     var setFolder = function () {
+         $('#jstree').jstree("close_all");
+     };
+     $(".closer").click(setFolder);
+
+
+     //scroll tree to selected item
+     scrollTree = function () {
+         var ell1 =  $( "p:contains('"+teacher_name+"')");
+	 //in case of name mess in the database we are ready to search by part of th name
+         if (ell1==null || ell1.length==0) ell1 =  $( "p:contains('"+teacher_name.split(" ")[0]+"')");
+         var ell=ell1.parent().parent();
+         if (ell ==null|| ell.length==0) return;
+
+         $('#jstree').jstree("select_node", ell);
+         var ofst = parseInt(ell.position().top);
+         $(".for_tree").animate( { scrollTop: ofst }, 0 );
+     };
+
+
+     //clear list
+     var clearSelect = function () {
+             var tc = $(".for_checked");
+             for (var i=0; i<tc.length; i++){
+                 tc[i].checked = false;
+             }
+     };
+    $(".cleaner").click(clearSelect);
+
+
+     //select new item
+     var scheDuler = function () {
+         if (teacher_login.trim().length=0) return;
+         $('#p_name').val(teacher_name);
+         $('#p_subj').val(subject_name);
+         $('#p_login').val(teacher_login);
+         $(".deleter").prop('disabled', true);
+         $(".scheduler").prop('disabled', true);
+         $('#for_teacher_name').html("");
+         $('#for_subject_name').html("");
+         //sending form
+         if (sending) return;
+         sending=true;
+         document.getElementById("my_form").submit();
+     };
+     $(".scheduler").click(scheDuler);
+
+
+
+
+    //tree reactions on selecting
+    $('#jstree').on("changed.jstree", function (e, data) {
+
+	$('.for_sl span').css('color', 'steelblue');
+        $(".scheduler").prop('disabled', true);
+
+        //get the selected node
+        var child_node=$('#'+data.selected[0]);
+        //if a node doe's not contains class "for select" we retreat
+        //"for_sl" marks the node of the second level which contains a form name
+        //if it is selected we process it
+        // the upper node contains a teacher's name
+        if (!child_node.hasClass('for_sl')) return;
+
+        //get upper node in the tree
+        var parent_node=child_node.parent().parent();
+
+        //get name, hidden login and subject for the following form submitting
+        subject_name=child_node.find('.target_node').text();
+        teacher_name = parent_node.find('.for_name_shown').text();
+        teacher_login=parent_node.find('.for_log_hide').text();
+
+        //mark selection in orange color
+        child_node.find('> a> .target_node').css('color', 'orange');
+        $(".scheduler").prop('disabled', false);
+    });
+
+
+
+    //tree creation and tuning
+    $.jstree.defaults.core.themes.variant = "middle";
+    $.jstree.defaults.core.themes.icons=false;
+    $('#jstree')
+        .bind('ready.jstree', function(e, data) {
+            setUnFolder();
+            //after loading page and jstree is ready
+            //scroll the tree to current item and
+            //then show up the tree (fade in)
+            //allowing timeout for a timeout for unfolding and scrolling
+            setTimeout(function () {
+                teacher_name = $('#p_name').val();
+                subject_name = $('#p_subj').val();
+                teacher_login = $('#p_login').val();
+                $('#for_subject_name').html(subject_name);
+                $('#for_teacher_name').html(teacher_name);
+                if (teacher_login.length > 0) {
+                    scrollTree();
+                    $(".deleter").prop('disabled', false);
+                    $(".scheduler").prop('disabled', true);
+                    $(".saver").prop('disabled', false);
+		    $(".cleaner").prop('disabled', false);
+                }
+                $('#jstree').add("#for_checks, fieldset").fadeTo(400, 1, function(){$(".spinner").css('display','none');});
+            },300);
+        }).jstree({animation:10});
+});
+
+
+
+</script>
+
+</body>
+</html>
+

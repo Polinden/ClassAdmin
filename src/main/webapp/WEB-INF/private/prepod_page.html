@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" type="text/css" th:href="@{/private/css/bootstrap.min.css}"/>
+    <link rel="stylesheet" type="text/css" th:href="@{/private/css/bootstrap-theme.min.css}"/>
+    <link rel="stylesheet" type="text/css" th:href="@{/private/css/datatables.min.css}"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"/>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>FMH</title>
+
+
+    <style type="text/css">
+        html, body {background-color: burlywood; height: 100%}
+        body {min-width: 70em;}
+
+        .nav li {font-size: 120%; font-weight: 700}
+        .for_title {padding: 1em}
+        .title {display: inline-block; color: white; font-weight: 800}
+        .for_head {min-height: 10%}
+        .for_head li a {color: white}
+        .for_head li a:hover {color: #476b6b}
+        .active * {background-color: burlywood !important;}
+
+        .main_bg {background-color: burlywood; display: inline-block; width: 100%; height: 85%; min-height: 52em; padding: 2%}
+        .for_internal span {color: midnightblue}
+
+        .for_internal img, for_title img {margin-right: 2%; margin-left: 2%}
+        .for_title img {margin-right: 3%}
+        .form-group label {min-width: 5em}
+
+        input {margin-right: 2%; float: left}
+        td {text-align: left; cursor: pointer}
+        .has-error label {color: darkred}
+
+       .gray {
+        background: #94b8b8;
+        background: -moz-linear-gradient(top,  #94b8b8 0%, #476b6b 100%);
+        background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#94b8b8), color-stop(100%,#476b6b));
+        background: -webkit-linear-gradient(top,  #94b8b8 0%,#476b6b 100%);
+        background: -o-linear-gradient(top,  #94b8b8 0%,#476b6b 100%);
+        background: -ms-linear-gradient(top,  #94b8b8 0%,#476b6b 100%);
+        background: linear-gradient(top,  #94b8b8 0%,#476b6b 100%);
+        }
+
+    </style>
+</head>
+
+
+
+<body>
+
+
+    <div class="for_head gray">
+        <div class="for_title">
+            <img th:src="@{/private/icons/gerb.png}">  <h2 class="title">Классный администратор</h2>
+        </div>
+
+        <ul class="nav nav-tabs">
+            <li><a th:href="@{/admin/startpage}">Главная</a></li>
+            <li><a th:href="@{/admin/subjects_page}">Предметы</a></li>
+            <li class="active"><a th:href="@{/admin/prepod_page}">Преподаватели</a></li>
+            <li><a th:href="@{/admin/schedule_page}">Расписание</a></li>
+            <li><a th:href="@{/admin/student_page}">Ученики</a></li>
+            <li><a th:href="@{/goout}">Выход</a></li></li>
+        </ul>
+    </div>
+
+
+
+<!-- FORM -->
+<form id="my_form" role="form" method="post" autocomplete="off">
+    <!-- cratch for dissabling autofill -->
+    <input type="text" style="display:none">
+    <input type="password" style="display:none">
+
+
+    <div class="main_bg container">
+        <!-- SPINNER -->
+        <div class="spinner" style="text-align: center; position: absolute; top: 40px; right: 10px; width: 70px">
+            <i class="fa fa-refresh fa-spin" style="font-size:36px; color: #23527c"></i>
+        </div>
+        <div class="for_spinner" style="opacity: 0">
+
+            <table id="mainTable" class="display" cellspacing="0" width="100%">
+                <thead>
+                <th hidden></th>
+                <th style="width: 28%">Фамилия</th>
+                <th style="width: 18%">Имя</th>
+                <th style="width: 19%">Отчество</th>
+                <th style="width: 15%">Логин</th>
+                <th style="width: 20%">Пароль</th>
+                </thead>
+
+                <tfoot>
+                <th hidden></th>
+                <th style="width: 28%">Фамилия</th>
+                <th style="width: 18%">Имя</th>
+                <th style="width: 19%">Отчество</th>
+                <th style="width: 15%">Логин</th>
+                <th style="width: 20%">Пароль</th>
+                </tfoot>
+
+                <tbody>
+                    <tr th:each="prep : ${prepods}">
+                        <td class="hidden_login" hidden th:text="${prep.login}"></td>
+                        <td th:text="${prep.fst_name}"></td>
+                        <td th:text="${prep.scd_name}"></td>
+                        <td th:text="${prep.thd_name}"></td>
+                        <td th:text="${prep.login}"></td>
+                        <td th:text="${prep.passwd}"></td>
+                    </tr>
+                </tbody>
+            </table>
+
+        </div>
+
+
+        <hr>
+        <div class="row">
+
+            <div class="col-xs-12" hidden>
+                <input type="text" required class="form-control" name="exlogin" id="name_to_replace" placeholder="id">
+            </div>
+
+            <div class="col-xs-4">
+                <div class="form-group">
+                    <label for="surname">Фамилия</label>
+                    <input required type="text" maxlength="50" class="form-control" name="fst_name" id="surname" placeholder="Фамилия">
+                </div>
+            </div>
+
+            <div class="col-xs-2">
+                <div class="form-group">
+                    <label for="name">Имя</label>
+                    <input type="text" required maxlength="50" class="form-control" name="scd_name" id="name" placeholder="Имя">
+                </div>
+            </div>
+            <div class="col-xs-2">
+                <div class="form-group">
+                    <label for="fname">Отчество</label>
+                    <input type="text" maxlength="50" class="form-control" required  name="thd_name" id="fname" placeholder="Отчество">
+                </div>
+            </div>
+            <div class="col-xs-2">
+                <div class="form-group">
+                    <label for="login">Логин</label>
+                    <input type="text" class="form-control" maxlength="20" required name=login id="login" placeholder="Логин" autocomplete="off">
+                </div>
+            </div>
+            <div class="col-xs-2">
+                <div class="form-group">
+                    <label for="passw">Пароль</label>
+                    <input type="text" class="form-control" maxlength="20" id="passw" name="passwd" required placeholder="Пароль" autocomplete="off">
+                </div>
+            </div>
+        </div>
+
+        <div class="row"><div class="col-xs-12"><p style="height: 1em"></p></div></div>
+
+
+        <div class="row">
+            <div class="col-xs-offset-4 col-xs-2 s">
+                <button style="width: 100%" type="button" class="inserter btn btn-primary">Вставить</button>
+            </div>
+            <div class="col-xs-2 s">
+                    <button style="width: 100%" type="button" class="replacer btn btn-info">Заменить</button>
+            </div>
+            <div class="col-xs-2">
+                <button style="width: 100%" type="button" class="deleter btn btn-warning">Удалить</button>
+            </div>
+            <div class="col-xs-2 s">
+                <button style="width: 100%" type="button" class="scheduler btn btn-success" data-toggle="modal" data-target="#myModal">Внести в расписание</button>
+            </div>
+        </div>
+
+    </div>
+
+
+
+
+    <!-- Modal -->
+    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title" id="myModalLabel">Выбор предмета</h4>
+                </div>
+                <div class="modal-body">
+
+                    <div class="form-group">
+                        <label for="selected_subject">Предмет</label>
+                        <select class="form-control" name="selected" id="selected_subject">
+                            <option th:each="subj: ${subjs}" th:value="${subj}">
+                                <span th:text="${subj}"></span>
+                            </option>
+                        </select>
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Закрыть</button>
+                    <button type="button" class="scheduler2 btn btn-primary">Дальше</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</form>
+
+
+<script th:src="@{/private/js/jquery.min.js}"></script>
+<script th:src="@{/private/js/bootstrap.min.js}"></script>
+<script th:src="@{/private/js/datatables.min.js}"></script>
+<script th:src="@{/private/js/bootbox.min.js}"></script>
+<script th:inline="javascript">
+        //we are setting up path variables for the form sending
+        //theamleaf stile was used for changing script to add path to the from requisites
+        var path1=/*[[@{/add_teach_list}]]*/;
+        var path2=/*[[@{/del_teach_list}]]*/;
+        var path3=/*[[@{/ins_teach_list}]]*/;
+        var path4=/*[[@{/upd_teach_list}]]*/;
+        var revertTo= [[${revertto}]];
+</script>
+<script th:src="@{/private/js/prepod.js}"></script>
+
+
+</body>
+</html>
+

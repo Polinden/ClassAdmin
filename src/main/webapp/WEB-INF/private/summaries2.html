@@ -1,0 +1,283 @@
+<!DOCTYPE html SYSTEM "http://www.thymeleaf.org/dtd/xhtml1-strict-thymeleaf-4.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+
+
+<head>
+    <link rel="stylesheet" type="text/css" th:href="@{/private/css/bootstrap.min.css}"/>
+    <link rel="stylesheet" type="text/css" th:href="@{/private/css/bootstrap-theme.min.css}"/>
+    <link rel="stylesheet" type="text/css" th:href="@{/private/css/datatables.min.css}"/>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>FMH</title>
+
+    <style type="text/css">
+        html, body {background-color: burlywood; height: 100%}
+        body {min-width: 70em;}
+
+        .for_title img {margin-right: 3%}
+        .nav li {font-size: 120%; font-weight: 700}
+        .for_title {padding: 1em}
+        .title {display: inline-block; color: white; font-weight: 800}
+        .for_head {min-height: 10%}
+        .for_head li a {color: white}
+        .for_head li a:hover {color: steelblue}
+        .active * {background-color: burlywood !important;}
+
+        .main_bg {background-color: burlywood; display: inline-block; width: 100%; height: 85%; min-height: 40em; padding: 5%}
+        .main_frame {background-color: burlywood; display: inline-block; width: 100%; height: 30%; min-height: 10em; padding-left: 1%; padding-right: 1%}
+
+        fieldset {border:groove; border-width: 2px; border-color: white;}
+        legend {font-size: 1em; color: steelblue; width: 8em; margin:  0px; padding: 0; color: gray; padding-left: 3px; margin-left: 10px; display:inline; border: none;}
+        thead > tr > th {color: dimgray; padding-left: 0!important;}
+
+        .form-group {padding: 2em;}
+        button {margin-top: 5px!important; width: 135px}
+
+        .gray {
+        background: #94b8b8;
+        background: -moz-linear-gradient(top,  #94b8b8 0%, #476b6b 100%);
+        background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#94b8b8), color-stop(100%,#476b6b));
+        background: -webkit-linear-gradient(top,  #94b8b8 0%,#476b6b 100%);
+        background: -o-linear-gradient(top,  #94b8b8 0%,#476b6b 100%);
+        background: -ms-linear-gradient(top,  #94b8b8 0%,#476b6b 100%);
+        background: linear-gradient(top,  #94b8b8 0%,#476b6b 100%);
+        }
+
+    </style>
+
+
+
+</head>
+<body>
+
+<div class="for_head gray">
+    <div class="for_title">
+        <img th:src="@{/private/icons/gerb.png}">  <h2 class="title">Классный администратор</h2>
+    </div>
+
+    <ul class="nav nav-tabs">
+        <li><a th:href="@{/admin/startpage}">Главная</a></li>
+        <li class="active"><a th:href="@{/admin/summaries/table.html}">Таблица</a></li>
+        <li><a th:href="@{/goout}">Выход</a></li>
+    </ul>
+</div>
+
+
+<div class="main_bg container">
+    <div class="main_frame">
+        <div class="row">
+            <div class="col-xs-8">
+                <h3>Итоговый отчет</h3>
+                <h4>Средние и итоговые оценки за текущий учебный год</h4>
+                <br/>
+                <table id="mytable" class="display" width="100%"></table>
+                <br/>
+            </div>
+            <div class="col-xs-1">
+            </div>
+            <div class="col-xs-3">
+                <h3 th:text="'Класс '+${sform}"></h3>
+                <h3 style="color: #761c19" th:text="${ssubj}"></h3>
+                <br/><br/>
+                <form id="my_form" method="get">
+                    <fieldset>
+                        <legend>Виберите класс</legend>
+                        <div class="form-group">
+                            <label for="selected_form">Классы</label>
+                            <select class="form-control" onchange="changeHandler(false)" name="sel_form" id="selected_form">
+                                <option th:each="iter : ${from_and_subjects}" th:value="${iter.key}"
+                                        th:text="${iter.key}" th:selected="${iter.key}==${sform}">
+                                </option>
+                            </select>
+                            <br/>
+                            <button class="forXLS btn btn-info">XLS отчет</button>
+                            <br/><br/>
+                            <label for="selected_subj">Предметы</label>
+                            <select class="form-control" name="sel_subj" id="selected_subj">
+                                <option>
+                                </option>
+                            </select>
+                            <br/>
+                            <button class="forOpen btn btn-warning">Открыть</button>
+                            <br/>
+                        </div>
+                    </fieldset>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<script th:src="@{/private/js/jquery.min.js}"></script>
+<script th:src="@{/private/js/bootstrap.min.js}"></script>
+<script th:src="@{/private/js/datatables.min.js}"></script>
+<script th:inline="javascript">
+
+    //for element select 'onchange'
+    var changeHandler;
+    //path
+    var path1=/*[[@{/get_XLS_sum}]]*/;
+    var path2=/*[[@{/admin/summaries/table.html}]]*/;
+    //selected subject
+    var subj_sel=[[${ssubj}]];
+
+    (function() {
+
+        //draw a table
+        function drawTable (set, aver_set) {
+                $('#mytable').DataTable( {
+
+                    data: prepareData(set, aver_set),
+                    columns: prepareTitel(set),
+
+                    "lengthMenu": [
+                        [8, 16, 32, -1], [8, 16, 32, "Всi"]
+                    ],
+                    "order": [
+                        [ 0, "asc" ]
+                    ],
+
+                    "scrollY": "21em", "scrollCollapse": true, deferRender:    true,
+
+                    language: {
+                        "sProcessing": "Зачекайте...", "sLengthMenu": "Показати _MENU_ записів", "sZeroRecords": "Записи відсутні.",
+                        "sInfo": "Записи з _START_ по _END_ із _TOTAL_ записів", "sInfoEmpty": "Записи з 0 по 0 із 0 записів",
+                        "sInfoFiltered": "(відфільтровано з _MAX_ записів)", "sInfoPostFix": "", "sSearch": "Пошук:",
+                        "sUrl": "", "oPaginate": {"sFirst": "Перша", "sPrevious": "Попередня", "sNext": "Наступна", "sLast": "Остання"},
+                        "oAria": {"sSortAscending": ": активувати для сортування стовпців за зростанням",
+                        "sSortDescending": ": активувати для сортування стовпців за спаданням"}
+                    }
+            });
+        }
+
+
+        //helpers
+        //set handler - on select a form change subjects eligible for the form
+        changeHandler = function (first_time_call){
+            var sel = $("#selected_form>option:selected").val();
+            var set;
+
+            //find the form
+            for (key in optionsMap) if (key==sel) set = optionsMap[key];
+            set.sort();
+
+            $('#selected_subj').empty();
+            $.each(set, function (i, item) {
+                //if first call (load page) select the specified item
+                if (first_time_call && item==subj_sel)
+                    $('#selected_subj').append($('<option>', {
+                        value: item,
+                        text: item,
+                        selected: true
+                    }));
+                else
+                $('#selected_subj').append($('<option>', {
+                    value: item,
+                    text: item
+                }));
+            });
+        };
+
+
+        //marks for the table
+        //structure: {Series: [ {surname: Mark} ] }
+        // to structure for table [ [surnames,  marks1, marks2...],...]
+        function prepareData(set, aver_set) {
+            var data_ft =[];
+            for (var key in set) {
+                var i=0;
+                for (var keyy in set[key]) {
+                    if (data_ft[i] == undefined) {
+                        data_ft[i] = [];
+                        data_ft[i].push(keyy);
+                        if (aver_set[keyy]!=undefined) data_ft[i].push(aver_set[keyy]); else data_ft[i].push('');
+                    }
+                    data_ft[i++].push((set[key][keyy]!=undefined && set[key][keyy]!=0)?set[key][keyy]:'');
+                }
+            }
+            return data_ft;
+        }
+        function prepareTitel(set) {
+            var title_ft =[];
+            title_ft[0]={ title: "Прізвище та iм'я учня" };
+            title_ft[1]={ title: "Середн.бал" };
+            var i=2;
+            for (var key in set) {
+                var key_bridged=key;
+                if (key.replace!=undefined) key_bridged=key.replace('Семестрова', 'Сем-р');
+                title_ft[i++] ={ title:  key_bridged};
+            }
+            return title_ft;
+        }
+
+
+        //warning
+        function warnOnEmptyData(set) {
+            var series = Object.keys(set);
+            console.log(set);
+            console.log(series);
+            if (series.length==0) {
+                $( "#mytable" ).replaceWith( "<h3 style='color: #761c19'>Недостаточно информации для представления результатов!</h3>" );
+                return false;
+            }
+            return true;
+        }
+
+
+        //sorter
+        function sortMap(map) {
+            var map2 = {};
+            if (map['Семестрова 1']!=undefined)map2['Семестр 1']= map['Семестрова 1'];
+            if (map['Семестрова 2']!=undefined)map2['Семестр 2']= map['Семестрова 2'];
+            if (map['Річна']!=undefined)map2['Річна    ']= map['Річна'];
+            if (map['ДПА']!=undefined)map2['ДПА     ']= map['ДПА'];
+            if (Object.keys(map2).length!=Object.keys(map).length) return map;
+            return map2;
+        }
+
+
+        //submit XLS receiving
+        var froXLS=function () {
+            var form = document.getElementById("my_form");
+            form.action = path1;
+            form.submit();
+        };
+        $(".forXLS").click(froXLS);
+
+
+        //open new table
+        var froOpen=function () {
+            var form = document.getElementById("my_form");
+            form.action = path2;
+            form.submit();
+        };
+        $(".forOpen").click(froOpen);
+
+
+
+        //STARTING HERE+++++++++++++
+        //prepare data
+        //list of average marks
+        var rowData = [[${mymap}]];
+        if (rowData==undefined) rowData={};
+        rowData = sortMap(rowData);
+        //map of form and corresponding subjects
+        var optionsMap = [[${from_and_subjects}]];
+        //average marks
+        var averData = [[${aver}]];
+        //fill option elements
+        changeHandler(true);
+        if (warnOnEmptyData(rowData)) drawTable(rowData, averData);
+
+
+    })();
+
+</script>
+
+
+</body>
+</html>
